@@ -8,7 +8,6 @@ const getTasksController = async (req, res) => {
 }
 
 const createTasksController = async (req, res) =>{
-    console.log(req.body.taskTitle, "-------------------------------------------")
     const newTask = await schema.taskCollection.create({
         taskTitle:req.body.taskTitle,
         taskBody:req.body.taskBody
@@ -17,6 +16,33 @@ const createTasksController = async (req, res) =>{
     res.json({"message":"new task created", "data":newTask})
 }
 
+const getSingleTaskController = async (req, res) => {
+    const taskID = req.params.id;
+    const task = await schema.taskCollection.findById(taskID);
+    if(!task) {
+        res.status(404).json({"message":"task not found"});
+
+    }else{
+        res.json({"message":"task found", "data":task});
+    }
+
+}
+
+const editSingleTaskController = async (req, res) => {
+    const task = await schema.taskCollection.find({"taskTitle":req.params.taskTitle});
+    console.log(task.length);
+
+    if(task.length === 0) {
+        res.status(404).json({"message":"task not found"});
+
+    }else{
+        secondTask = task[0]
+        secondTask.taskTitle = req.body.taskTitle
+        secondTask.save()
+        res.json({"message":"task updated"});
+    }
+}
+
 module.exports = {
-    getTasksController, createTasksController
+    getTasksController, createTasksController, getSingleTaskController, editSingleTaskController
 }
