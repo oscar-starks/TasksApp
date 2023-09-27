@@ -30,7 +30,6 @@ const getSingleTaskController = async (req, res) => {
 
 const editSingleTaskController = async (req, res) => {
     const task = await schema.taskCollection.find({"taskTitle":req.params.taskTitle});
-    console.log(task.length);
 
     if(task.length === 0) {
         res.status(404).json({"message":"task not found"});
@@ -43,6 +42,22 @@ const editSingleTaskController = async (req, res) => {
     }
 }
 
+const deleteSingleTask = async (req, res) => {
+    const task = await schema.taskCollection.findByIdAndDelete(req.params.id)
+    .then((deletedItem) => {
+        if (deletedItem) {
+          res.json({"message":'Item deleted successfully', "data":deletedItem});
+        } else {
+          res.status(400).json({"message":'No matching item found.:', "data":deletedItem});
+
+        }
+      })
+      .catch((error) => {
+        res.status(400).json({'message':error.message})
+      });
+
+}
+
 module.exports = {
-    getTasksController, createTasksController, getSingleTaskController, editSingleTaskController
+    getTasksController, createTasksController, getSingleTaskController, editSingleTaskController, deleteSingleTask
 }
