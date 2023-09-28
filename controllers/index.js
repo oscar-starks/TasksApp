@@ -1,9 +1,9 @@
 const express = require('express');
 const path = require('path');
 const app = express();
+require('dotenv').config({path: path.join(__dirname, '..', '.env')});
 const PORT = process.env.PORT || 4000;
 const mongoose = require('mongoose');
-require('dotenv').config({path: path.join(__dirname, '..', '.env')});
 const connect = mongoose.connect(process.env.DATABASE_URL);
 
 connect.then(()=> {
