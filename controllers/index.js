@@ -5,6 +5,8 @@ require('dotenv').config({path: path.join(__dirname, '..', '.env')});
 const PORT = process.env.PORT || 4000;
 const mongoose = require('mongoose');
 const connect = mongoose.connect(process.env.DATABASE_URL);
+const authMiddleWare = require('../middlewares/auth');
+
 
 connect.then(()=> {
     console.log('connected to database');
@@ -18,5 +20,7 @@ app.listen(PORT, function() {
 });
 app.use(express.json());
 
-app.use('/auth', require('../routers/auth.js'));
 app.use('/tasks', require('../routers/tasks.js'));
+
+app.use(authMiddleWare.verifyJWTMiddleware);
+app.use('/auth', require('../routers/auth.js'));

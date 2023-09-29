@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const path = require('path');
 require('dotenv').config({path: path.join(__dirname, '..', '.env')});
 const authSchema = require('../schema/user');
+const { runInNewContext } = require('vm');
 
 
 const verifyJWTMiddleware = (req, res, next) => {
@@ -41,4 +42,15 @@ const verifyJWTMiddleware = (req, res, next) => {
 
 }
 
-module.exports = verifyJWTMiddleware
+const verifyAdminMiddleware = (req, res, next) => {
+    console.log(req.user.role)
+    if (req.user.role !== "admin"){
+        res.status(401).json({"message":"only admin is allowed"})
+   }
+    next()
+
+}
+
+module.exports = {
+    verifyJWTMiddleware, verifyAdminMiddleware
+}

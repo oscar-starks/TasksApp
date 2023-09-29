@@ -17,7 +17,7 @@ const registerUserController = async (req, res) => {
             fullName:req.body.fullName,
             password:hashedPassword,
             email:req.body.email,
-            role:req.body.role,
+            // role:req.body.role,
         })
     
         res.status(201).json({"message":"new user created" })
