@@ -8,6 +8,12 @@ const taskSchema = new mongoose.Schema({
         type:String,
         required : true,
     },
+    user:{
+        type:mongoose.Schema.ObjectId,
+        ref:"users",
+        default:"651527595c85bade5cebe8bd"
+        
+    }
 },{timestamps:true});
 
 const taskCollection = mongoose.model('tasks', taskSchema);

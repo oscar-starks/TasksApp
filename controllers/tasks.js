@@ -10,7 +10,8 @@ const getTasksController = async (req, res) => {
 const createTasksController = async (req, res) =>{
     const newTask = await schema.taskCollection.create({
         taskTitle:req.body.taskTitle,
-        taskBody:req.body.taskBody
+        taskBody:req.body.taskBody,
+        user:req.user.id,
     });
 
     res.json({"message":"new task created", "data":newTask})
