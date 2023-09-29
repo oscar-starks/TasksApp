@@ -26,44 +26,46 @@ const createTasksController = async (req, res) =>{
 
 const getSingleTaskController = async (req, res) => {
     const taskID = req.params.id;
-    const task = await schema.taskCollection.findById(taskID);
-    if(!task) {
-        res.status(404).json({"message":"task not found"});
-
-    }else{
-        res.json({"message":"task found", "data":task});
-    }
+    const task = await schema.taskCollection.find({_id:taskID, user: req.user.id})
+    .then((task) => {
+          res.json({"message":'Item retrieved successfully', "data":task});
+      })
+      .catch((error) => {
+        res.status(400).json({"message":'No matching item found'});
+      });
 
 }
 
 const editSingleTaskController = async (req, res) => {
-    const task = await schema.taskCollection.find({"taskTitle":req.params.taskTitle});
+    const taskID = req.params.id;
+    const task = await schema.taskCollection.find({_id:taskID, user: req.user.id})
 
-    if(task.length === 0) {
-        res.status(404).json({"message":"task not found"});
-
-    }else{
+    .then((task) =>{
         secondTask = task[0]
-        secondTask.taskTitle = req.body.taskTitle
+        secondTask.taskBody = req.body.taskBody
         secondTask.save()
         res.json({"message":"task updated"});
-    }
+    })
+    .catch((err) =>{
+        res.status(404).json({"message":"task not found"});
+    });
+ 
 }
 
 const deleteSingleTask = async (req, res) => {
-    const task = await schema.taskCollection.findByIdAndDelete(req.params.id)
-    .then((deletedItem) => {
-        if (deletedItem) {
-          res.json({"message":'Item deleted successfully', "data":deletedItem});
+    const taskID = req.params.id;
+    const task = await schema.taskCollection.findOneAndDelete({_id:taskID, user: req.user.id})
+    .then((task) => {
+        if (task) {
+          res.json({"message":'Item deleted successfully', "data":task});
         } else {
-          res.status(400).json({"message":'No matching item found.:', "data":deletedItem});
+          res.status(400).json({"message":'No matching item found'});
 
         }
       })
       .catch((error) => {
         res.status(400).json({'message':error.message})
       });
-
 }
 
 module.exports = {
