@@ -4,9 +4,16 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 require('dotenv').config({path: path.join(__dirname, '..', '.env')});
 secretKey = process.env.SECRET_KEY
+const {validationResult } = require('express-validator');
 
 
 const registerUserController = async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
     const salt = bcrypt.genSaltSync(10);
     const hashedPassword = bcrypt.hashSync(req.body.password, salt);
 
@@ -17,7 +24,6 @@ const registerUserController = async (req, res) => {
             fullName:req.body.fullName,
             password:hashedPassword,
             email:req.body.email,
-            // role:req.body.role,
         })
     
         res.status(201).json({"message":"new user created" })
@@ -28,6 +34,12 @@ const registerUserController = async (req, res) => {
 }
 
 const loginController = async (req, res, next) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
     user = await schema.userCollection.findOne({"email": req.body.email})
 
     if(!user) {
