@@ -1,6 +1,7 @@
 const path = require('path');
 require('dotenv').config({path: path.join(__dirname, '..', '.env')});
-const schema  = require('../schema/tasks')
+const schema  = require('../schema/tasks');     
+const {validationResult } = require('express-validator');
 
 const getTasksController = async (req, res) => {
     const tasks = await schema.taskCollection.find();
@@ -8,6 +9,12 @@ const getTasksController = async (req, res) => {
 }
 
 const createTasksController = async (req, res) =>{
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
     const newTask = await schema.taskCollection.create({
         taskTitle:req.body.taskTitle,
         taskBody:req.body.taskBody,
