@@ -78,35 +78,41 @@ const accountRecoveryController = async (req, res) => {
         return res.status(400).json({ errors: errors.array() });
     }
 
-    var transporter = nodemailer.createTransport({
-        service: process.env.EMAIL_SERVICE,
-        auth: {
-          user: process.env.USER_EMAIL,
-          pass: process.env.SMTP_PASSWORD
-        }
-      });
-      
-      var mailOptions = {
-        from: process.env.USER_EMAIL,
-        to: req.body.email,
-        subject: 'Sending Email',
-        text: 'THIS IS A TEST EMAIL'
-      };
-      
-      transporter.sendMail(mailOptions, function(error, info){
-        if (error) {
-          console.log(error);
-          res.status(500).json({message: error.message});
+    user = await schema.userCollection.findOne({"email": req.body.email})
 
-        }
-    
+    if(!user) {
+        res.status(404).json({"message":"user with that email does not exist" })
+
+    }else{
+        var transporter = nodemailer.createTransport({
+            service: process.env.EMAIL_SERVICE,
+            auth: {
+              user: process.env.USER_EMAIL,
+              pass: process.env.SMTP_PASSWORD
+            }
+          });
+      
+        var mailOptions = {
+            from: process.env.USER_EMAIL,
+            to: req.body.email,
+            subject: 'Sending Email',
+            text: 'THIS IS A TEST EMAIL'
+        };
         
-    });
-    console.log("email has been sent to " + req.body.email )
-    
-    res.status(200).json({"message":"email sent successful"})
+        transporter.sendMail(mailOptions, function(error, info){
+            if (error) {
+            console.log(error);
+            res.status(500).json({message: error.message});
 
+            }
+        
+        
+        });
+        console.log("email has been sent to " + req.body.email )
+        res.status(200).json({"message":"email sent successful"})
+        }
       
+        
 }
 
 module.exports = {
