@@ -5,6 +5,8 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config({path: path.join(__dirname, '..', '.env')});
 secretKey = process.env.SECRET_KEY
 const {validationResult } = require('express-validator');
+var nodemailer = require('nodemailer');
+const { request } = require('http');
 
 
 const registerUserController = async (req, res) => {
@@ -68,6 +70,45 @@ const loginController = async (req, res, next) => {
 }
 }
 
+
+const accountRecoveryController = async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    var transporter = nodemailer.createTransport({
+        service: process.env.EMAIL_SERVICE,
+        auth: {
+          user: process.env.USER_EMAIL,
+          pass: process.env.SMTP_PASSWORD
+        }
+      });
+      
+      var mailOptions = {
+        from: process.env.USER_EMAIL,
+        to: req.body.email,
+        subject: 'Sending Email',
+        text: 'THIS IS A TEST EMAIL'
+      };
+      
+      transporter.sendMail(mailOptions, function(error, info){
+        if (error) {
+          console.log(error);
+          res.status(500).json({message: error.message});
+
+        }
+    
+        
+    });
+    console.log("email has been sent to " + req.body.email )
+    
+    res.status(200).json({"message":"email sent successful"})
+
+      
+}
+
 module.exports = {
-    registerUserController, loginController
+    registerUserController, loginController, accountRecoveryController
 }

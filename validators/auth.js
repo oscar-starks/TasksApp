@@ -12,7 +12,10 @@ const loginValidator  = [
     check('password', "must provide a password"),
 ]
 
+const emailValidator = [
+    check('email', 'must provide a valid email'),
+]
 
 module.exports = {
-    newUserValidator, loginValidator
+    newUserValidator, loginValidator, emailValidator
 }

@@ -20,7 +20,7 @@ app.listen(PORT, function() {
 });
 app.use(express.json());
 
-app.use('/tasks', require('../routers/tasks.js'));
+app.use('/auth', require('../routers/auth.js'));
 
 app.use(authMiddleWare.verifyJWTMiddleware);
-app.use('/auth', require('../routers/auth.js'));
+app.use('/tasks', require('../routers/tasks.js'));
