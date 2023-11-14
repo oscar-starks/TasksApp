@@ -21,8 +21,24 @@ const userSchema = new mongoose.Schema({
     },
 },{timestamps:true});
 
+
+const accountRecoverySchema = new mongoose.Schema({
+    user:{
+        type:mongoose.Schema.ObjectId,
+        ref:"users",        
+    },
+    otp : {
+        type:String,
+        required : true,
+        // unique:true,
+        // maxlength:4,
+    },
+})
+
+const recoverySchema = mongoose.model('RecoverySchema', accountRecoverySchema);
 const userCollection = mongoose.model('users', userSchema);
 
 module.exports = {
-    userCollection
+    userCollection,
+    recoverySchema,
 };

@@ -6,7 +6,7 @@ require('dotenv').config({path: path.join(__dirname, '..', '.env')});
 secretKey = process.env.SECRET_KEY
 const {validationResult } = require('express-validator');
 var nodemailer = require('nodemailer');
-const { request } = require('http');
+// const { request } = require('http');
 
 
 const registerUserController = async (req, res) => {
@@ -84,6 +84,12 @@ const accountRecoveryController = async (req, res) => {
         res.status(404).json({"message":"user with that email does not exist" })
 
     }else{
+        otp = Math.floor(Math.random() * Math.floor(9999));
+        const salt = bcrypt.genSaltSync(10);
+        const hashedOTP = bcrypt.hashSync(otp.toString(), salt);
+
+        accountRecovery = await schema.recoverySchema.create({"user": user.id, "otp":hashedOTP})
+
         var transporter = nodemailer.createTransport({
             service: process.env.EMAIL_SERVICE,
             auth: {
@@ -95,8 +101,9 @@ const accountRecoveryController = async (req, res) => {
         var mailOptions = {
             from: process.env.USER_EMAIL,
             to: req.body.email,
-            subject: 'Sending Email',
-            text: 'THIS IS A TEST EMAIL'
+            subject: 'Account Recovery',
+            text: `This is the account recovery with token ${otp.toString()}. If you did not request for this, please ignore`
+                    
         };
         
         transporter.sendMail(mailOptions, function(error, info){
@@ -109,9 +116,13 @@ const accountRecoveryController = async (req, res) => {
         
         });
         console.log("email has been sent to " + req.body.email )
-        res.status(200).json({"message":"email sent successful"})
+        res.status(200).json({"message":"email sent successful",
+                              "event_id":accountRecovery.id
+                            })
         }
-      
+
+
+        
         
 }
 
