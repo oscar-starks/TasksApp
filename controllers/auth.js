@@ -6,7 +6,8 @@ require('dotenv').config({path: path.join(__dirname, '..', '.env')});
 secretKey = process.env.SECRET_KEY
 const {validationResult } = require('express-validator');
 var nodemailer = require('nodemailer');
-// const { request } = require('http');
+const handlebars = require('handlebars');
+const fs = require('fs');
 
 
 const registerUserController = async (req, res) => {
@@ -97,33 +98,50 @@ const accountRecoveryController = async (req, res) => {
               pass: process.env.SMTP_PASSWORD
             }
           });
-      
-        var mailOptions = {
+
+        const templateDir = path.join(__dirname, '..', 'emails');
+        
+        const source = fs.readFileSync(path.join(templateDir, 'recovery.hbs'), 'utf8');
+
+        // Compile the template using Handlebars
+        const template = handlebars.compile(source);
+
+        // Set up Nodemailer to use Handlebars for HTML rendering
+        transporter.use('compile', (mail, callback) => {
+            if (mail.data.html) {
+                // If HTML content is present, compile it using the Handlebars template
+                mail.data.html = template(mail.data.context);
+            }
+            callback();
+        });
+
+        context = {
+                'username': user.fullName,
+                'otp': otp.toString()
+            }
+
+        const mailOptions = {
             from: process.env.USER_EMAIL,
             to: req.body.email,
-            subject: 'Account Recovery',
-            text: `This is the account recovery with token ${otp.toString()}. If you did not request for this, please ignore`
-                    
-        };
-        
-        transporter.sendMail(mailOptions, function(error, info){
-            if (error) {
-            console.log(error);
-            res.status(500).json({message: error.message});
+            subject: 'Test Email',
+            context: context, 
+            html: template
+        }
 
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.error(error);
+            } else {
+                console.log('Email sent: ' + info.response);
             }
-        
-        
-        });
+         });
+
         console.log("email has been sent to " + req.body.email )
         res.status(200).json({"message":"email sent successful",
                               "event_id":accountRecovery.id
                             })
         }
 
-
-        
-        
 }
 
 module.exports = {
