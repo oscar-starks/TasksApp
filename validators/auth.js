@@ -16,6 +16,11 @@ const emailValidator = [
     check('email', 'must provide a valid email'),
 ]
 
+const OTPEventValidator =[
+    check('otp', 'must provide a four digit otp').isLength({min:4, max:4}),
+    check("event_id", 'must provide a valid event id')
+]
+
 module.exports = {
-    newUserValidator, loginValidator, emailValidator
+    newUserValidator, loginValidator, emailValidator, OTPEventValidator
 }

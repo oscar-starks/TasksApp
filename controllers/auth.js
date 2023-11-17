@@ -136,7 +136,6 @@ const accountRecoveryController = async (req, res) => {
             }
          });
 
-        console.log("email has been sent to " + req.body.email )
         res.status(200).json({"message":"email sent successful",
                               "event_id":accountRecovery.id
                             })
@@ -144,6 +143,42 @@ const accountRecoveryController = async (req, res) => {
 
 }
 
+const confirmOTPController = async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    const otp_instance = await schema.recoverySchema.findOne({_id:req.body.event_id, verified:false})
+    .then((instance) => {
+        if (instance){
+            otp = req.body.otp;
+
+            const otpMatch = bcrypt.compareSync(otp, instance.otp);
+
+            if (otpMatch){
+                instance.verified = true;
+                instance.save();
+
+                res.status(200).send({"message":"instance verified"})
+            }
+        
+        } else {
+          res.status(400).json({"message":'No matching otp found'});
+
+        }
+      })
+      .catch((error) => {
+        res.status(400).json({'message':error.message})
+      });
+
+
+
+    
+}
+
+
 module.exports = {
-    registerUserController, loginController, accountRecoveryController
+    registerUserController, loginController, accountRecoveryController, confirmOTPController
 }

@@ -30,9 +30,18 @@ const accountRecoverySchema = new mongoose.Schema({
     otp : {
         type:String,
         required : true,
-        // unique:true,
-        // maxlength:4,
     },
+    verified : {
+        type:Boolean,
+        required : true,
+        default : false
+    },
+    used : {
+        type:Boolean,
+        required : true,
+        default : false
+    }
+
 })
 
 const recoverySchema = mongoose.model('RecoverySchema', accountRecoverySchema);
