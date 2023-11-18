@@ -160,9 +160,12 @@ const confirmOTPController = async (req, res) => {
             if (otpMatch){
                 instance.verified = true;
                 instance.save();
-
                 res.status(200).send({"message":"instance verified"})
-            }
+
+            }else {
+                res.status(400).json({"message":'No matching otp found'});
+      
+              }
         
         } else {
           res.status(400).json({"message":'No matching otp found'});
@@ -170,15 +173,51 @@ const confirmOTPController = async (req, res) => {
         }
       })
       .catch((error) => {
-        res.status(400).json({'message':error.message})
+        console.log("new error from confirmOTPController view, error: " + error.message);
+        res.status(500).json({'message':"something went wrong, please contact the administrator"})
+      });
+
+}
+
+const newPasswordController = async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    const otp_instance = await schema.recoverySchema.find({_id:req.body.event_id, verified:true, used:false}).populate('user')
+    .then((instance) => {
+        if (instance.length > 0) {
+
+            instance = instance[0]
+
+            const user = instance.user
+            const salt = bcrypt.genSaltSync(10);
+            const hashedPassword = bcrypt.hashSync(req.body.password, salt);
+
+            user.password = hashedPassword
+            user.save();
+
+            instance.used = true;
+            instance.save();
+
+            res.status(200).send({message: "password set successfully"});
+
+    }else{
+        res.status(400).send({message: "instance not found"});
+
+    }}
+    ).catch((error) => {
+        console.log("new error from newPasswordController view, error: " + error.message);
+        res.status(500).json({'message':"something went wrong, please contact the administrator"})
       });
 
 
-
-    
 }
 
-
 module.exports = {
-    registerUserController, loginController, accountRecoveryController, confirmOTPController
+    registerUserController, loginController, 
+    accountRecoveryController, confirmOTPController,
+    newPasswordController
 }

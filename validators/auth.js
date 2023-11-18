@@ -21,6 +21,13 @@ const OTPEventValidator =[
     check("event_id", 'must provide a valid event id')
 ]
 
+const newPasswordValidator = [
+    check("event_id", 'must provide a valid event id'),
+    check('password', 'password must be provided').isLength({min:5}),
+]
+
 module.exports = {
-    newUserValidator, loginValidator, emailValidator, OTPEventValidator
+    newUserValidator, loginValidator, 
+    emailValidator, OTPEventValidator,
+    newPasswordValidator
 }
