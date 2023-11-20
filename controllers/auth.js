@@ -123,7 +123,7 @@ const accountRecoveryController = async (req, res) => {
         const mailOptions = {
             from: process.env.USER_EMAIL,
             to: req.body.email,
-            subject: 'Test Email',
+            subject: 'Account Recovery Email',
             context: context, 
             html: template
         }
