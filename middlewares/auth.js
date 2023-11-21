@@ -12,7 +12,7 @@ const verifyJWTMiddleware = (req, res, next) => {
     jwt.verify(
         authToken,
         process.env.SECRET_KEY,
-        (err, decoded) =>{
+        (err, decoded) => {
             if (err) {
                 return res.status(403).json({"message":"authorization failed"});
             }
@@ -37,7 +37,6 @@ const verifyJWTMiddleware = (req, res, next) => {
           
         }
     )
-
 
 }
 
