@@ -2,7 +2,6 @@ const jwt = require('jsonwebtoken');
 const path = require('path');
 require('dotenv').config({path: path.join(__dirname, '..', '.env')});
 const authSchema = require('../schema/user');
-const { runInNewContext } = require('vm');
 
 
 const verifyJWTMiddleware = (req, res, next) => {
@@ -14,26 +13,26 @@ const verifyJWTMiddleware = (req, res, next) => {
         authToken,
         process.env.SECRET_KEY,
         (err, decoded) =>{
-            if (err) return res.status(403).json({"message":"authorization failed"});
+            if (err) {
+                return res.status(403).json({"message":"authorization failed"});
+            }
             else{
                 if(decoded.id){
                     id = decoded.id;    
                     user =  authSchema.userCollection.findById(id)
-                    .then(function(user) {
-                        if (!user){
-                            res.status(403).json({"message":"authorization failed"})
-                        }else{
-                            req.user = user
-                            next()
-                        }
+                            .then(function(user) {
+                                if (!user){
+                                    res.status(403).json({"message":"authorization failed"})
+                                }else{
+                                    req.user = user
+                                    next()
+                                }
                         
-                    })
-
+                            })
 
                 }else{
                     res.status(403).json({"message":"authorization failed"})
                 }
-
             }
           
         }
@@ -47,7 +46,6 @@ const verifyAdminMiddleware = (req, res, next) => {
     if (req.user.role !== "admin"){
         res.status(401).json({"message":"only admin is allowed"})
    }
-    next()
 
 }
 
