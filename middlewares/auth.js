@@ -48,6 +48,59 @@ const verifyAdminMiddleware = (req, res, next) => {
 
 }
 
+
+const socketAuthMiddleware = (token) => {
+    const [tokenType, jwtkey] = token.split(" ");
+
+    if (tokenType == "Bearer") {
+
+        jwt.verify(
+            authToken,
+            process.env.SECRET_KEY,
+            (err, decoded) => {
+                if (err) {
+                    return {
+                        "error": "authorization failed",
+                        "user_details": null
+                    }
+                }
+                else{
+                    if(decoded.id){
+                        id = decoded.id;    
+                        user =  authSchema.userCollection.findById(id)
+                                .then(function(user) {
+                                    if (!user){
+                                        return {
+                                            "error": "authorization failed",
+                                            "user_details": null
+                                        }
+                                    }else{
+                                        return {
+                                            "error": null,
+                                            "user_details": user
+                                        }
+                                    }
+                            
+                                })
+    
+                    }else{
+                        res.status(403).json({"message":"authorization failed"})
+                    }
+                }
+              
+            }
+        )
+    
+    }else{
+        return {
+            "error": "authorization details not provided",
+            "user_details": null
+        }
+    }
+
+}
+
 module.exports = {
-    verifyJWTMiddleware, verifyAdminMiddleware
+    verifyJWTMiddleware, verifyAdminMiddleware,
+    socketAuthMiddleware
 }

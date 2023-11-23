@@ -11,7 +11,6 @@ const taskSchema = new mongoose.Schema({
     user:{
         type:mongoose.Schema.ObjectId,
         ref:"users",
-        default:"651527595c85bade5cebe8bd"
         
     }
 },{timestamps:true});

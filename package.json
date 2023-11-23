@@ -22,6 +22,7 @@
     "nodemailer": "^6.9.7",
     "nodemailer-express-handlebars": "^6.1.0",
     "nodemon": "^3.0.1",
+    "socket.io": "^4.7.2",
     "supertest": "^6.3.3"
   },
   "repository": {
