@@ -7,11 +7,13 @@ const mongoose = require('mongoose');
 const connect = mongoose.connect(process.env.DATABASE_URL);
 const authMiddleWare = require('../middlewares/auth');
 
-const {Server} = require("socket.io");
+
+const { Server } = require("socket.io");
 const { createServer } = require("http");
 
 const httpServer = createServer(app);
 const io = new Server(httpServer);
+
 
 const cors = require("cors");
 const logger = require('morgan');
@@ -23,9 +25,61 @@ connect.then(()=> {
     console.log("error connecting to database", "reason: " + err.message);
 });
 
-app.listen(PORT, function() {
-    console.log(`listening on port ${PORT}`);
+// setting up the socket
+io.on('connection',(socket, next) => {
+    console.log(socket.id);
+
+    socket.on("disconnect", () => {
+      console.log("User disconnected")
+    });
+
+    socket.on("message", (message) => {
+        console.log(message);
+        socket.emit("message", "chicken kitchen")
+    });
+
+
 });
+
+
+// io.use((socket, next) => {
+//     const token = socket.request.headers.auth;
+  
+//     const {error, user} = ioAuthController(token);
+  
+//     if(error) return socket.emit("error", "an error occurred while trying to authenticate");
+  
+//     socket.request.userDetails = user;
+  
+//     next();
+  
+//   });
+  
+//   io.on("connection", async (socket) => {
+  
+//     const socketId = socket.id;
+//     // const userDetails = socket.request.userDetails;
+  
+//     // const user = await connectedUsersCollection.create({
+//     //   user: userDetails.userId,
+//     //   socketId
+//     // });
+//     // const onlineUser = await userCollection.findById(userDetails.userId);
+
+//   socket.broadcast.emit("user-online", `${socketId} is online`);
+
+//   socket.on("disconnect", async (reason) => {});
+
+
+// //   socket.on("users", async ({}, callback) => {
+// //     const users = await userCollection.find({_id: {$ne: userDetails.userId}});
+// //     callback(users);
+//   });
+ 
+  
+
+ 
+
 
 // this specifies the allowed domains
 app.use(cors({
@@ -40,35 +94,16 @@ app.use(express.json());
 
 app.use('/auth', require('../routers/auth.js'));
 
-app.use(authMiddleWare.verifyJWTMiddleware);
+app.use(authMiddleWare.verifyJWTMiddleware); 
 app.use('/tasks', require('../routers/tasks.js'));
 
 
-
-
-
-// setting uo the socket
-io.on('connection',(socket) => {
-    console.log(socket.id);
-
-    socket.on("send-message",(payload, callback) => {
-        console.log(payload);
-
-        socket.to(payload.sendTo).emit("new-message", {
-            message: payload.message,
-        });
-
-        callback({
-            success: true,
-            message: "your message has been sent"
-        });
-    });
-
-    socket.on("disconnect", (err) => {
-        console.log("user just disconnected")
-    });
-
+httpServer.listen(PORT, function() {
+    console.log(`listening on port ${PORT}`);
 });
+  
+
+
 
 // io.use((socket, next) => {
 //     const token = socket.request.headers.auth;

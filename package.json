@@ -4,7 +4,9 @@
   "main": "index.js",
   "scripts": {
     "test": "npx jest",
-    "start": "nodemon controllers/index"
+    "start": "node controllers/index",
+    "dev": "nodemon controllers/index"
+
   },
   "author": "",
   "license": "ISC",
