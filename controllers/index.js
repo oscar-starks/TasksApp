@@ -35,7 +35,14 @@ io.on('connection',(socket, next) => {
 
     socket.on("message", (message) => {
         console.log(message);
-        socket.emit("message", "chicken kitchen")
+        io.emit("message", "chicken kitchen")
+
+        // socket.broadcast.emit("message", "chicken kitchen")
+
+        // socket.emit emits the message to the user that is connected or the user that sends the data
+        // while io.emit sends the message to everyone that's connected
+        // the socket.broadcast.emit sends the message to everyone except the sender
+        
     });
 
 
