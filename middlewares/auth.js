@@ -50,31 +50,46 @@ const verifyAdminMiddleware = (req, res, next) => {
 
 
 const socketAuthMiddleware = (token) => {
+
+    if (token == null){
+        return {
+            "error": "authorization details not provided",
+            "user_details": null
+        }
+    }
+
     const [tokenType, jwtkey] = token.split(" ");
 
     if (tokenType == "Bearer") {
 
         jwt.verify(
-            authToken,
+            jwtkey,
             process.env.SECRET_KEY,
             (err, decoded) => {
                 if (err) {
+                    console.log("----4")
                     return {
                         "error": "authorization failed",
                         "user_details": null
                     }
                 }
                 else{
+                    console.log("123----")
                     if(decoded.id){
-                        id = decoded.id;    
+                        console.log("chicken")
+                        id = decoded.id;  
+                        console.log(id)  
                         user =  authSchema.userCollection.findById(id)
                                 .then(function(user) {
+                                    console.log(user, "------==")
                                     if (!user){
+                                        console.log("1------")
                                         return {
                                             "error": "authorization failed",
                                             "user_details": null
                                         }
                                     }else{
+                                        console.log("2-------")
                                         return {
                                             "error": null,
                                             "user_details": user
@@ -82,9 +97,16 @@ const socketAuthMiddleware = (token) => {
                                     }
                             
                                 })
+
+                        // console.log(user)
     
                     }else{
-                        res.status(403).json({"message":"authorization failed"})
+                        // res.status(403).json({"message":"authorization failed"})
+                        console.log("3------")
+                        return {
+                            "error": "authorization failed",
+                            "user_details": null
+                        }
                     }
                 }
               

@@ -25,9 +25,40 @@ connect.then(()=> {
     console.log("error connecting to database", "reason: " + err.message);
 });
 
+io.use((socket, next) => {
+    const token = socket.request.headers.token;
+
+    const {user,error} = authMiddleWare.socketAuthMiddleware(token);
+    
+    console.log(RES)
+
+    console.log(error)
+    console.log(error != null)
+
+    if (error != null) {
+        err = new Error("not authorized")
+        next(err);
+        socket.disconnect()
+    //    return socket.emit("error", "authentication failed");
+
+    }
+    else{
+        socket.headers.user = user;
+        next();
+
+     }
+
+   
+});
+
+
 // setting up the socket
 io.on('connection',(socket, next) => {
     console.log(socket.id);
+
+    const token = socket.request.headers.token;
+    console.log(token)
+
 
     socket.on("disconnect", () => {
       console.log("User disconnected")
@@ -112,16 +143,3 @@ httpServer.listen(PORT, function() {
 
 
 
-// io.use((socket, next) => {
-//     const token = socket.request.headers.auth;
-
-//     const {error, user} = authMiddleWare.socketAuthMiddleware(token);
-
-//     if (error) {
-//        return socket.emit("error", "authentication failed");
-//     }
-
-//     socket.headers.user_details = user;
-//     next();
-   
-// });
