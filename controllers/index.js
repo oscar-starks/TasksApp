@@ -25,40 +25,27 @@ connect.then(()=> {
     console.log("error connecting to database", "reason: " + err.message);
 });
 
-io.use((socket, next) => {
+io.use(async function(socket, next) {
     const token = socket.request.headers.token;
-
-    const {user,error} = authMiddleWare.socketAuthMiddleware(token);
-    
-    console.log(RES)
-
-    console.log(error)
-    console.log(error != null)
+    const {user_details,error} = await authMiddleWare.socketAuthMiddleware(token);
 
     if (error != null) {
-        err = new Error("not authorized")
+        err = new Error("authorization failed");
         next(err);
-        socket.disconnect()
-    //    return socket.emit("error", "authentication failed");
+       return socket.emit("error", "authentication failed");
 
     }
     else{
-        socket.headers.user = user;
+        socket.request.headers.user = user_details;
         next();
 
      }
-
    
 });
 
 
 // setting up the socket
 io.on('connection',(socket, next) => {
-    console.log(socket.id);
-
-    const token = socket.request.headers.token;
-    console.log(token)
-
 
     socket.on("disconnect", () => {
       console.log("User disconnected")
@@ -78,46 +65,6 @@ io.on('connection',(socket, next) => {
 
 
 });
-
-
-// io.use((socket, next) => {
-//     const token = socket.request.headers.auth;
-  
-//     const {error, user} = ioAuthController(token);
-  
-//     if(error) return socket.emit("error", "an error occurred while trying to authenticate");
-  
-//     socket.request.userDetails = user;
-  
-//     next();
-  
-//   });
-  
-//   io.on("connection", async (socket) => {
-  
-//     const socketId = socket.id;
-//     // const userDetails = socket.request.userDetails;
-  
-//     // const user = await connectedUsersCollection.create({
-//     //   user: userDetails.userId,
-//     //   socketId
-//     // });
-//     // const onlineUser = await userCollection.findById(userDetails.userId);
-
-//   socket.broadcast.emit("user-online", `${socketId} is online`);
-
-//   socket.on("disconnect", async (reason) => {});
-
-
-// //   socket.on("users", async ({}, callback) => {
-// //     const users = await userCollection.find({_id: {$ne: userDetails.userId}});
-// //     callback(users);
-//   });
- 
-  
-
- 
-
 
 // this specifies the allowed domains
 app.use(cors({
