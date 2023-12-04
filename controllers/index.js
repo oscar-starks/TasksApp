@@ -7,12 +7,13 @@ const mongoose = require('mongoose');
 const connect = mongoose.connect(process.env.DATABASE_URL);
 const authMiddleWare = require('../middlewares/auth');
 
-
-const { Server } = require("socket.io");
 const { createServer } = require("http");
-
+const { Server } = require("socket.io");
 const httpServer = createServer(app);
+
 const io = new Server(httpServer);
+const socket_auth = require("../socket.io/auth")
+
 
 
 const cors = require("cors");
@@ -25,24 +26,16 @@ connect.then(()=> {
     console.log("error connecting to database", "reason: " + err.message);
 });
 
-io.use(async function(socket, next) {
-    const token = socket.request.headers.token;
-    const {user_details,error} = await authMiddleWare.socketAuthMiddleware(token);
 
-    if (error != null) {
-        err = new Error("authorization failed");
-        next(err);
-       return socket.emit("error", "authentication failed");
+// this specifies the allowed domains
+app.use(cors({
+    origin: process.env.ALLOWED_DOMAINS
+}));
 
-    }
-    else{
-        socket.request.headers.user = user_details;
-        next();
+// this makes the server to be accessible to all origins
+// app.use(cors())
 
-     }
-   
-});
-
+io.use(socket_auth.authentication)
 
 // setting up the socket
 io.on('connection',(socket, next) => {
@@ -53,7 +46,6 @@ io.on('connection',(socket, next) => {
 
     socket.on("message", (message) => {
         console.log(message);
-        io.emit("message", "chicken kitchen")
 
         // socket.broadcast.emit("message", "chicken kitchen")
 
@@ -66,13 +58,6 @@ io.on('connection',(socket, next) => {
 
 });
 
-// this specifies the allowed domains
-app.use(cors({
-    origin: process.env.ALLOWED_DOMAINS
-}));
-
-// this makes the server to be accessible to all origins
-// app.use(cors())
 
 app.use(logger(":method :url :status response-time =>  :response-time ms from [==:user-agent==]"));
 app.use(express.json());
