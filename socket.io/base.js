@@ -5,18 +5,39 @@ let io;
 
 function initialize(server){
     io = new Server(server);
-
     io.use(socket_auth.authentication)
 
     // setting up the socket
     io.on('connection',(socket, next) => {
+        user = socket.request.headers.user 
+
+        socket.join(user.id)
 
     socket.on("disconnect", () => {
       console.log("User disconnected")
     });
 
     socket.on("message", (message) => {
-        console.log(message);
+        let user_id = socket.request.headers.user.id
+        let socket_id = socket.id
+        
+        try{
+            const obj = JSON.parse(message)
+
+            io.to(user_id).emit("message",{
+                "type":"sent_data",
+                "data":obj
+            })
+
+        }catch(e){
+
+            io.to(socket_id).emit("message", {
+                "type":"invalid data type",
+                "message":"message sent must be of type json"
+            });
+
+        }
+        
 
         // socket.broadcast.emit("message", "chicken kitchen")
 
